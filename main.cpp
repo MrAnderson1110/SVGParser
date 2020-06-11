@@ -3,6 +3,8 @@
 
 #include "svgreader.h"
 
+const QString inPath = "/home/mranderson/Work/Графы/systemsV2.svg";
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -18,7 +20,8 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.load(url);
 
-
+    SVGReader::instance()->setPath(inPath);
+    SVGReader::instance()->readAll();
 
     return app.exec();
 }
