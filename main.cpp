@@ -3,7 +3,7 @@
 
 #include "svgreader.h"
 
-const QString inPath = "/home/mranderson/Work/Графы/systemsV2.svg";
+const QString inPath = "/home/mranderson/Work/Графы/Агрегаты/graph.svg";
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
+
+
 
     SVGReader::instance()->setPath(inPath);
     SVGReader::instance()->readAll();

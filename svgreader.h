@@ -2,7 +2,6 @@
 #define SVGREADER_H
 
 #include <QObject>
-#include <QString>
 #include <QFile>
 #include <QTextStream>
 #include <QXmlStreamReader>
@@ -18,26 +17,15 @@ public:
 
     static SVGReader *instance();
 
-    inline QTextStream *inStream() const
-    { return m_inStream; }
-    inline void setInStream(QTextStream *inStream)
-    { if(inStream) m_inStream = inStream; }
-
-    inline QString svgText() const
+    QString svgText() const
     { return m_svgText; }
-    void setSvgText(const QString &svgText);
+    void setSvgText(const QString svgText);
 
-    inline QString path() const
+    QString path() const
     { return m_path; }
-    void setPath(const QString &inPath);
+    void setPath(const QString &path);
 
-    inline QFile *inFile() const
-    { return m_inFile; }
-    inline void setInFile(QFile *inFile) {
-        if(inFile && inFile != m_inFile) {
-            m_inFile = inFile;
-        }
-    }
+    bool setInFile(QFile *inFile);
 
     bool readAll();
 
