@@ -6,7 +6,7 @@
 #include <QTextStream>
 #include <QXmlStreamReader>
 
-
+#define svgReader SVGReader::instance()
 
 class SVGReader : public QObject, public QXmlStreamReader
 {
@@ -17,6 +17,8 @@ public:
 
     static SVGReader *instance();
 
+    QString getAttribute(const QString &value);
+
     QString svgText() const
     { return m_svgText; }
     void setSvgText(const QString svgText);
@@ -25,9 +27,10 @@ public:
     { return m_path; }
     void setPath(const QString &path);
 
-    bool setInFile(QFile *inFile);
-
     bool readAll();
+
+    QXmlStreamReader::TokenType readNextComment();
+    QXmlStreamReader::TokenType readNextElement();
 
     ~SVGReader();
 
@@ -37,12 +40,13 @@ signals:
 
 private:
     explicit SVGReader(QObject *parent = nullptr);
+    bool setInFile(QFile *inFile);
 
     static SVGReader *m_instance;
-    QTextStream *m_inStream;
     QFile *m_inFile;
     QString m_svgText;
     QString m_path;
 };
+
 
 #endif // SVGREADER_H

@@ -3,7 +3,7 @@
 
 SVGReader *SVGReader::m_instance = nullptr;
 
-SVGReader::SVGReader(QObject *parent) : QObject(parent), QXmlStreamReader(), m_inStream(new QTextStream()), m_inFile(nullptr) {}
+SVGReader::SVGReader(QObject *parent) : QObject(parent), QXmlStreamReader(), m_inFile(nullptr) {}
 
 SVGReader *SVGReader::instance()
 {
@@ -11,6 +11,11 @@ SVGReader *SVGReader::instance()
         m_instance  = new SVGReader();
     }
     return m_instance;
+}
+
+QString SVGReader::getAttribute(const QString &value)
+{
+    return attributes().value(value).toString();
 }
 
 void SVGReader::setSvgText(const QString svgText)
@@ -25,21 +30,23 @@ void SVGReader::setPath(const QString &path)
 {
     if(m_path != path) {
         m_path = path;
-        pathChanged(m_path);
+        emit pathChanged(m_path);
     }
 }
 
 bool SVGReader::setInFile(QFile *inFile)
 {
-    if(inFile && inFile != m_inFile) {
-        m_inFile = inFile;
-        if(!m_inFile->open(QIODevice::ReadOnly)) {
-            qDebug() << "file " << m_inFile->fileName() << " did not opened!";
-            return false;
-        }
-        return true;
+    if(m_inFile) {
+        if(m_inFile->isOpen())
+            m_inFile->close();
+        delete m_inFile;
     }
-    return false;
+    m_inFile = inFile;
+    if(!m_inFile->open(QIODevice::ReadOnly)) {
+        qDebug() << "file " << m_inFile->fileName() << " did not opened: " << m_inFile->errorString();
+        return false;
+    }
+    return true;
 }
 
 
@@ -47,19 +54,54 @@ bool SVGReader::readAll()
 {
     if(!m_inFile) {
         setInFile(new QFile(m_path));
+        setDevice(m_inFile);
     }
-    setDevice(m_inFile);
-    while(!atEnd() || !hasError()) {
-        readNext();
-        m_svgText += text().toString() + "\n";
+    if(!device()) {
+        setDevice(m_inFile);
     }
+    //ToDo Метод для чтения всего SVGфайла для отображания на экране
     qDebug() << "svg text file is : " << m_svgText;
     return true;
 }
+
+QXmlStreamReader::TokenType SVGReader::readNextComment()
+{
+    if(!m_inFile) {
+        setInFile(new QFile(m_path));
+        setDevice(m_inFile);
+    }
+    if(!device()) {
+        setDevice(m_inFile);
+    }
+    readNext();
+    while (tokenType() != QXmlStreamReader::Comment) {
+        readNext();
+    }
+    return  QXmlStreamReader::tokenType();
+}
+
+QXmlStreamReader::TokenType SVGReader::readNextElement()
+{
+    if(!m_inFile) {
+        setInFile(new QFile(m_path));
+        setDevice(m_inFile);
+    }
+    if(!device()) {
+        setDevice(m_inFile);
+    }
+    readNext();
+    while(tokenType() != QXmlStreamReader::StartElement &&
+          tokenType() != QXmlStreamReader::Comment &&
+          tokenType() != QXmlStreamReader::EndElement &&
+          tokenType() != QXmlStreamReader::EndDocument) {
+        readNext();
+    }
+    return QXmlStreamReader::tokenType();
+}
+
 
 SVGReader::~SVGReader()
 {
     m_inFile->close();
     delete m_inFile;
-    delete m_inStream;
 }

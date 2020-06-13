@@ -2,8 +2,10 @@
 #include <QQmlApplicationEngine>
 
 #include "svgreader.h"
+#include "svgrecoder.h"
 
 const QString inPath = "/home/mranderson/Work/Графы/Агрегаты/graph.svg";
+const QString outPath = "/home/mranderson/Work/Графы/Агрегаты/JSONgraph.txt";
 
 int main(int argc, char *argv[])
 {
@@ -20,10 +22,9 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.load(url);
 
-
-
-    SVGReader::instance()->setPath(inPath);
-    SVGReader::instance()->readAll();
-
+    svgReader->setPath(inPath);
+    svgRecoder->setPath(outPath);
+    svgRecoder->parse();
+    svgRecoder->record();
     return app.exec();
 }
