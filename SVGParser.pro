@@ -38,3 +38,5 @@ HEADERS += \
     svgreader.h \
     svgrecoder.h \
     svgtype.h
+
+DISTFILES +=

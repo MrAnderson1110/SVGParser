@@ -5,7 +5,11 @@
 #include "svgrecoder.h"
 
 const QString inPath = "/home/mranderson/Work/Графы/Агрегаты/graph.svg";
-const QString outPath = "/home/mranderson/Work/Графы/Агрегаты/JSONgraph.txt";
+const QString globalSettingPath = "/home/mranderson/Work/Графы/Агрегаты/JSONglobal";
+const QString nodesFilePath = "/home/mranderson/Work/Графы/Агрегаты/JSONnodes";
+const QString edgesFilePath = "/home/mranderson/Work/Графы/Агрегаты/JSONedges";
+const QString arrowsFilePath = "/home/mranderson/Work/Графы/Агрегаты/JSONarrows";
+const QString textFilePath = "/home/mranderson/Work/Графы/Агрегаты/JSONtext";
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +27,11 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     svgReader->setPath(inPath);
-    svgRecoder->setPath(outPath);
+    svgRecoder->setGlobalSettingsPath(globalSettingPath);
+    svgRecoder->setTextPath(textFilePath);
+    svgRecoder->setNodesPath(nodesFilePath);
+    svgRecoder->setEdgesPath(edgesFilePath);
+    svgRecoder->setArrowsPath(arrowsFilePath);
     svgRecoder->parse();
     svgRecoder->record();
     return app.exec();

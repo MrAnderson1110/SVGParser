@@ -29,6 +29,7 @@ public:
     void push(SVGType *type) { m_types.push_back(type); }
     int length() const { return m_types.length(); }
     SVGType *at(int pos) const { return m_types.at(pos); }
+    SVGType *last() const { return m_types.last(); }
 
     QString title() const;
     void setTitle(const QString &title);
