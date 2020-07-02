@@ -29,8 +29,8 @@ bool Constractor::makeNodes()
             notDidgChar += temp[j];
             ++stringLength;
         }
-        if(!compare(notDidgChar))
-            continue;
+//        if(!compare(notDidgChar))
+//            continue;
         m_hashId.insert(count, notDidgChar);
         notDidgChar.clear();
         for (int j = spacePos + 1; j < temp.size(); ++j) {
