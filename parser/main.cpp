@@ -4,8 +4,8 @@
 #include <QFile>
 #include <QString>
 
-const QString inPath = "/home/mranderson/Work/Графы/Агрегаты/nodes";
-const QString outPath = "/home/mranderson/Work/Графы/Агрегаты/unique_nodes";
+const QString inPath = "/home/adi/MyProj/Графы/системы_по_БЧ/БЧ-4";
+const QString outPath = "/home/adi/MyProj/Графы/unique_БЧ-4";
 
 int main()
 {

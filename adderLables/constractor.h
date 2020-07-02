@@ -21,6 +21,10 @@ public:
     int findSpacePos(QString str);
     bool isEmptyString(QString str);
 
+    void makeCompairList(const QString &path);
+
+    bool compare(const QString &str);
+
     bool writeOutput();
 
     QString nodeElements() const { return m_nodeElements; }
@@ -28,6 +32,7 @@ public:
     QString edgeElements() const { return m_edgeElements; }
 
 private:
+    QStringList m_compareList;
     QString m_nodeElements;
     QString m_edgeElements;
     QFile *m_outFile;
