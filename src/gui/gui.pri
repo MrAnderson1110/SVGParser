@@ -1,0 +1,6 @@
+
+SOURCES +=
+
+DESTDIR +=
+
+RESOURCES +=

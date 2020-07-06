@@ -4,12 +4,12 @@
 #include "svgreader.h"
 #include "svgrecoder.h"
 
-const QString inPath = "/home/adi/MyProj/Графы/graph.svg";
-const QString globalSettingPath = "/home/adi/MyProj/Графы/JSONglobal";
-const QString nodesFilePath = "/home/adi/MyProj/Графы/JSONnodes";
-const QString edgesFilePath = "/home/adi/MyProj/Графы/JSONedges";
-const QString arrowsFilePath = "/home/adi/MyProj/Графы/JSONarrows";
-const QString textFilePath = "/home/adi/MyProj/Графы/JSONtext";
+const QString inPath = "/home/adi/MyProj/Графы/системы_по_БЧ/БЧ-1/graph.svg";
+const QString globalSettingPath = "/home/adi/MyProj/Графы/системы_по_БЧ/БЧ-1/JSONglobal";
+const QString nodesFilePath = "/home/adi/MyProj/Графы/системы_по_БЧ/БЧ-1/JSONnodes";
+const QString edgesFilePath = "/home/adi/MyProj/Графы/системы_по_БЧ/БЧ-1/JSONedges";
+const QString arrowsFilePath = "/home/adi/MyProj/Графы/системы_по_БЧ/БЧ-1/JSONarrows";
+const QString textFilePath = "/home/adi/MyProj/Графы/системы_по_БЧ/БЧ-1/JSONtext";
 
 int main(int argc, char *argv[])
 {
