@@ -1,0 +1,12 @@
+#ifndef SVGPARSER_GLOBAL_H
+#define SVGPARSER_GLOBAL_H
+
+#include <QtGlobal>
+
+#ifdef SVGPARSER_LIB
+#   define SVGPARSER_EXPORT Q_DECL_EXPORT
+#else
+#   define SVGPARSER_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // SVGPARSER_GLOBAL_H

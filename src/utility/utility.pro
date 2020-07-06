@@ -1,4 +1,5 @@
 
+
 #--------------------------------------------------------------------------------------#
 
 ROOT_DIR = $${PWD}/../..
@@ -9,17 +10,14 @@ PLUGINS_DIR = $${ROOT_DIR}/plugins
 #--------------------------------------------------------------------------------------#
 
 TEMPLATE = lib
+TARGET = utility
 DESTDIR = $$LIBS_DIR
-TARGET = svgparser
-QT += core xml
 QT -= gui
 
-CONFIG -= debug_and_release_target debug_and_release
-
-include(svgparser.pri)
-
+include(utility.pri)
 DEFINES += $${upper($$TARGET)}_LIB
-INCLUDEPATH += $${SRC_DIR}/svgparser
+
+INCLUDEPATH +=$${SRC_DIR}/utility
 
 CONFIG(release, debug|release) {
     for(var, $$list($$files(qmldir, true))) {

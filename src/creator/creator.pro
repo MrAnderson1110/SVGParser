@@ -1,7 +1,7 @@
 
 #--------------------------------------------------------------------------------------#
 
-ROOT_DIR = $${PWD}/../..
+ROOT_DIR = $${PWD}/../../
 SRC_DIR = $${ROOT_DIR}/src
 LIBS_DIR = $${ROOT_DIR}/libs
 PLUGINS_DIR = $${ROOT_DIR}/plugins
@@ -9,21 +9,21 @@ PLUGINS_DIR = $${ROOT_DIR}/plugins
 #--------------------------------------------------------------------------------------#
 
 TEMPLATE = app
-TARGET += app
+TARGET = creator
 DESTDIR += $${ROOT_DIR}/app
 
-include(app.pri)
+include(creator.pri)
+DEFINES += $${upper($$TARGET)}_LIB
 
 QT += xml qml quick core gui
 
-INCLUDEPATH += $${SRC_DIR}/app
+INCLUDEPATH += $${SRC_DIR}/creator
 
 LIBS += -L$${LIBS_DIR}/ -lsvgparser
 INCLUDEPATH += $${SRC_DIR}/svgparser
 
-#Это понадобится, когда будет GUI
-#LIBS += -L$${LIBS_DIR}/
-#INCLUDEPATH += $${SRC_DIR}/gui/
+LIBS += -L$${LIBS_DIR}/ -lgenerator
+INCLUDEPATH += $${SRC_DIR}/generator
 
 MOC_DIR = $${ROOT_DIR}/build-$${QT_VERSION}/$${TARGET}
 OBJECTS_DIR = $${ROOT_DIR}/build-$${QT_VERSION}/$${TARGET}

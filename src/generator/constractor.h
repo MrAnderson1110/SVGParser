@@ -2,8 +2,7 @@
 #define CONSTRACTOR_H
 
 #include <QHash>
-#include <QFile>
-#include <QTextStream>
+#include "iohandler.h"
 
 class Constractor
 {

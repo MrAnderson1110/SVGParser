@@ -16,6 +16,13 @@ SVGRecoder *SVGRecoder::instance()
     return m_instance;
 }
 
+QObject *SVGRecoder::singletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+    return instance();
+}
+
 void SVGRecoder::readAll()
 {
     //TO DO: метод для отображения на экране
@@ -30,10 +37,21 @@ bool SVGRecoder::setOutFile(QFile *file)
     }
     m_outFile = file;
     if(!m_outFile->open(QIODevice::WriteOnly)) {
-        qDebug() << "file " << m_outFile->fileName() << " did not open: " << m_outFile->errorString();
+        setInfo("file " + m_outFile->fileName() + " did not open: " + m_outFile->errorString());
         return false;
     }
     return true;
+}
+
+QStringList SVGRecoder::info() const
+{
+    return m_info;
+}
+
+void SVGRecoder::setInfo(const QString &info)
+{
+    m_info.append(info);
+    emit infoChanged();
 }
 
 QString SVGRecoder::globalSettingsPath() const
@@ -99,27 +117,27 @@ void SVGRecoder::parse()
         if(svgReader->tokenType() == QXmlStreamReader::StartElement && svgReader->name() == "svg") {
             m_globalWidth = svgReader->getAttribute("width").split("pt")[0];
             m_globalHeight = svgReader->getAttribute("height").split("pt")[0];
-            qDebug() << "create main svg element";
+            setInfo("create main svg element");
         }
         else if(svgReader->tokenType() == QXmlStreamReader::StartElement && svgReader->name() == "g") {
             if(svgReader->getAttribute("class") != "graph") {
                 tempGroup = new SVGGroup();
                 tempGroup->setGroupClass(svgReader->getAttribute("class"));
                 tempGroup->setGroupId(svgReader->getAttribute("id"));
-                qDebug() << "create group element: " << svgReader->getAttribute("id");
+               setInfo("create group element: " + svgReader->getAttribute("id"));
             }
         }
         else if(svgReader->tokenType() == QXmlStreamReader::EndElement && svgReader->name() == "g") {
             if(tempGroup) {
                 m_groups.push_back(tempGroup);
                 tempGroup = nullptr;
-                qDebug() << "end of group element";
+                setInfo("end of group element");
             }
         }
         else if(svgReader->tokenType() == QXmlStreamReader::StartElement && svgReader->name() == "title") {
             if(tempGroup) {
                 tempGroup->setTitle(svgReader->readElementText());
-                qDebug() << "create title element: " << svgReader->readElementText();
+                setInfo("create title element: " + svgReader->readElementText());
             }
         }
         //        else if(svgReader->tokenType() == QXmlStreamReader::EndElement && svgReader->name() == "title") {
@@ -136,7 +154,7 @@ void SVGRecoder::parse()
                 tempPolygon->getChildType()->m_svgPolygon = tempPolygon;
                 tempPolygon->setId(tempGroup->title().toInt());
                 tempGroup->push(tempPolygon);
-                qDebug() << "create polygon element";
+                setInfo("create polygon element");
             }
         }
         //        else if(svgReader->tokenType() == QXmlStreamReader::EndElement && svgReader->name() == "polygon") {
@@ -158,7 +176,7 @@ void SVGRecoder::parse()
                 tempText->getChildType()->m_svgText = tempText;
                 tempText->setId(tempGroup->title().toInt());
                 tempGroup->push(tempText);
-                qDebug() << "create text element " << svgReader->readElementText();
+                setInfo("create text element " + svgReader->readElementText());
             }
         }
         //        else if(svgReader->tokenType() == QXmlStreamReader::EndElement && svgReader->name() == "text") {
@@ -175,7 +193,7 @@ void SVGRecoder::parse()
                 tempPath->setStroke(svgReader->getAttribute("stroke"));
                 tempPath->getChildType()->m_svgPath = tempPath;
                 tempGroup->push(tempPath);
-                qDebug() << "create path element";
+                setInfo("create path element");
             }
         }
         //        else if(svgReader->tokenType() == QXmlStreamReader::EndElement && svgReader->name() == "path") {
@@ -187,26 +205,26 @@ void SVGRecoder::parse()
 
 void SVGRecoder::record()
 {
-    qDebug() << "start recording global settings";
+    setInfo("start recording global settings");
 
     if(QFile::exists(m_globalSettingsPath))
         QFile::remove(m_globalSettingsPath);
     m_outFile->setFileName(m_globalSettingsPath);
     if(!m_outFile->open(QIODevice::WriteOnly)) {
-        qDebug() << "can not open file" << m_outFile->fileName() << ":" << m_outFile->errorString();
+        setInfo("can not open file" + m_outFile->fileName() + ":" + m_outFile->errorString());
         return;
     }
     m_stream.setDevice(m_outFile);
     m_stream << "[ { id: \"main_window\", width:" << m_globalWidth << ", height: " << m_globalHeight << " } ]";
     m_stream.flush();
 
-    qDebug() << "start recording nodes";
+    setInfo("start recording nodes");
 
     if(QFile::exists(m_nodesPath))
         QFile::remove(m_nodesPath);
     m_outFile->setFileName(m_nodesPath);
     if(!m_outFile->open(QIODevice::WriteOnly)) {
-        qDebug() << "can not open file" << m_outFile->fileName() << ":" << m_outFile->errorString();
+        setInfo("can not open file" + m_outFile->fileName() + ":" + m_outFile->errorString());
         return;
     }
     m_stream << " [ \n";
@@ -215,7 +233,7 @@ void SVGRecoder::record()
             for(int j = 0; j < m_groups[i]->length(); ++j) {
                 if(m_groups[i]->at(j)->type() == SVGType::Rectangle) {
                     SVGPolygon *rectangle = m_groups[i]->at(j)->getChildType()->m_svgPolygon;
-                    qDebug() << i << ": " << "recording rectangle ref: " << m_groups[i]->groupId();
+                    setInfo(QString::number(i) + ": " + "recording rectangle ref: " + m_groups[i]->groupId());
                     if(rectangle->fill().isEmpty() && rectangle->stroke().isEmpty())
                         m_stream << "{ type:\"polygon\", id:" << rectangle->getId() << ", ref:\"" << m_groups[i]->groupId() << "\", x:" << rectangle->x() << ", y:" << rectangle->y() <<
                                     ", height:" << rectangle->height() << ", width:" << rectangle->width() << ", edges_num:" << rectangle->conerCount() << " },\n";
@@ -237,13 +255,13 @@ void SVGRecoder::record()
     m_stream << " ]";
     m_stream.flush();
 
-    qDebug() << "start recording text";
+    setInfo("start recording text");
 
     if(QFile::exists(m_textPath))
         QFile::remove(m_textPath);
     m_outFile->setFileName(m_textPath);
     if(!m_outFile->open(QIODevice::WriteOnly)) {
-        qDebug() << "can not open file" << m_outFile->fileName() << ":" << m_outFile->errorString();
+        setInfo("can not open file" + m_outFile->fileName() + ":" + m_outFile->errorString());
         return;
     }
     m_stream << " [ \n";
@@ -252,7 +270,7 @@ void SVGRecoder::record()
             for(int j = 0; j < m_groups[i]->length(); ++j) {
                 if(m_groups[i]->at(j)->type() == SVGType::Text) {
                     SVGText *text = m_groups[i]->at(j)->getChildType()->m_svgText;
-                    qDebug() << i << ": " << "recording text id: " << m_groups[i]->groupId();
+                    setInfo(QString::number(i) + ": " + "recording text id: " + m_groups[i]->groupId());
                     if(text->fill().isEmpty() && text->stroke().isEmpty())
                         m_stream << "{ type:\"text\", id:" << text->getId() << ", ref:\"" << m_groups[i]->groupId() << "\", x:" << text->x() << ", y:" << text->y() <<
                                     ", fontFlamily:\"" << text->fontFamily() << "\", fontSize:" << text->fontSize() << ", position:\"" << text->textAnchors() <<
@@ -277,13 +295,13 @@ void SVGRecoder::record()
     m_stream << " ]";
     m_stream.flush();
 
-    qDebug() << "start recording edges";
+    setInfo("start recording edges");
 
     if(QFile::exists(m_edgesPath))
         QFile::remove(m_edgesPath);
     m_outFile->setFileName(m_edgesPath);
     if(!m_outFile->open(QIODevice::WriteOnly)) {
-        qDebug() << "can not open file" << m_outFile->fileName() << ":" << m_outFile->errorString();
+        setInfo("can not open file" + m_outFile->fileName() + ":" + m_outFile->errorString());
         return;
     }
     m_stream << " [ \n";
@@ -292,7 +310,7 @@ void SVGRecoder::record()
             for(int j = 0; j < m_groups[i]->length(); ++j) {
                 if(m_groups[i]->at(j)->type() == SVGType::Path) {
                     SVGPath *path = m_groups[i]->at(j)->getChildType()->m_svgPath;
-                    qDebug() << i << ": " << "recording path id: " << m_groups[i]->groupId();
+                    setInfo(QString::number(i) + ": " + "recording path id: " + m_groups[i]->groupId());
                     if(path->fill().isEmpty() && path->stroke().isEmpty())
                         m_stream << "{ type:\"path\", id:\"" << m_groups[i]->groupId() << "\", " << path->parseLines() << ", incomingId:" << path->incomingId() << ", outgoingId:" << path->outgoingId() << " },\n";
                     if(path->fill().isEmpty() && !path->stroke().isEmpty())
@@ -312,13 +330,13 @@ void SVGRecoder::record()
     m_stream << " ]";
     m_stream.flush();
 
-    qDebug() << "start recording arrows";
+    setInfo("start recording arrows");
 
     if(QFile::exists(m_arrowsPath))
         QFile::remove(m_arrowsPath);
     m_outFile->setFileName(m_arrowsPath);
     if(!m_outFile->open(QIODevice::WriteOnly)) {
-        qDebug() << "can not open file" << m_outFile->fileName() << ":" << m_outFile->errorString();
+        setInfo("can not open file" + m_outFile->fileName() + ":" + m_outFile->errorString());
         return;
     }
     m_stream << " [ \n";
@@ -327,7 +345,7 @@ void SVGRecoder::record()
             for(int j = 0; j < m_groups[i]->length(); ++j) {
                 if(m_groups[i]->at(j)->type() == SVGType::Triangle) {
                     SVGPolygon *triengle = m_groups[i]->at(j)->getChildType()->m_svgPolygon;
-                    qDebug() << i << ": " << "recording triengle id: " << m_groups[i]->groupId();
+                    setInfo(QString::number(i) + ": " + "recording triengle id: " + m_groups[i]->groupId());
                     if(triengle->fill().isEmpty() && triengle->stroke().isEmpty())
                         m_stream << "{ type:\"polygon\", id:\"" << m_groups[i]->groupId() << "\", x:" << triengle->x() << ", y:" << triengle->y() << ", rotation:" << triengle->triDirection() <<
                                     ", height:" << triengle->height() << ", width:" << triengle->width() << ", edges_num:" << triengle->conerCount() << " },\n";
@@ -484,7 +502,7 @@ void SVGRecoder::record()
 //    }
     m_stream << " ]";
     m_stream.flush();
-    qDebug() << "record finished";
+    setInfo("record finished");
 }
 
 SVGRecoder::~SVGRecoder()

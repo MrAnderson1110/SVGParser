@@ -1,4 +1,5 @@
 HEADERS += $$PWD/svggroup.h \
+           $$PWD/svgparser_global.h \
            $$PWD/svgreader.h \
            $$PWD/svgrecoder.h \
            $$PWD/svgtype.h

@@ -147,3 +147,98 @@ bool Constractor::writeOutput()
     (*m_stream) << start << nodeElements() << edgeElements() << end;
     return true;
 }
+
+
+bool makeUnique(const QString &inPath, const QString &outPath)
+{
+    QFile inFile(inPath);
+    QFile outFile(outPath);
+
+    QTextStream out(&outFile);
+    QTextStream in(&inFile);
+
+    QVector<QString> inVector;
+    QVector<QString> outVector;
+
+    if(!inFile.open(QIODevice::ReadOnly)) {
+        qDebug() << "file " << inPath << " did not opened!";
+        return false;
+    }
+
+    if(!outFile.open(QIODevice::ReadWrite)) {
+        qDebug() << "file " << outPath << " parsed_text.txt did not opened!";
+        return false;
+    }
+
+    int count = 0;
+    QString temp;
+    while(!in.atEnd()) {
+        temp = in.readLine() + '\n';
+        bool unique = true;
+
+        for(auto i = inVector.begin(); i != inVector.end(); ++i) {
+            unique = *i == temp ? false : true;
+            if(!unique)
+                break;
+        }
+        if(unique)
+            inVector.push_back(temp);
+        else
+            ++count;
+    }
+
+//    auto iter = std::unique(inVector.begin(), inVector.end());
+
+    for(auto i = inVector.begin(); i != inVector.end(); ++i) {
+        out << *i;
+    }
+
+    qDebug() << "Founded " << count << " same elements!/n";
+
+
+    return true;
+}
+
+bool devide(const QString &inPath, QString outPath)
+{
+    QFile inFile(inPath);
+
+    if(!inFile.open(QIODevice::ReadOnly)) {
+        qDebug() << "file " << inPath << " did not opened!";
+        return false;
+    }
+
+    QTextStream inStream(&inFile);
+
+    QMultiMap<QString, QString> systemMap;
+    QStringList outString;
+
+    while(!inStream.atEnd()) {
+        QString temp = inStream.readLine();
+        if(temp == '\n')
+            continue;
+        outString = temp.split("\t");
+        systemMap.insert(outString[0], outString[1]);
+    }
+
+    QString path = QString(outPath + "/%1/%1");
+    QList<QString> uniqueKeys = systemMap.uniqueKeys();
+
+    QFile outFile;
+    QTextStream outStream(&outFile);
+
+    for(int i = 0; i < uniqueKeys.size(); ++i) {
+        outFile.setFileName(outPath.arg(uniqueKeys[i]));
+        if(!outFile.open(QIODevice::WriteOnly)) {
+            qDebug() << "file " << inPath << " did not opened!";
+            return false;
+        }
+        QList<QString> values = systemMap.values(uniqueKeys[i]);
+        for(int i = 0; i < values.size(); ++i)
+            outStream << values[i] << "\n";
+
+        outFile.close();
+    }
+
+    return true;
+}

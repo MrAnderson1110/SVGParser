@@ -2,23 +2,30 @@
 #define SVGRECODER_H
 
 #include <QObject>
+#include "svgparser_global.h"
 #include "svgreader.h"
 #include "svgtype.h"
 
 #define svgRecoder SVGRecoder::instance()
 
-class SVGRecoder : public QObject
+class QQmlEngine;
+class QJSEngine;
+
+class SVGPARSER_EXPORT SVGRecoder : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SVGRecoder)
+    Q_PROPERTY(QStringList info READ info NOTIFY infoChanged)
 
 public:
 
     static SVGRecoder *instance();
+    static QObject *singletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
     void readAll();
 
-    void parse();
-    void record();
+    Q_INVOKABLE void parse();
+    Q_INVOKABLE void record();
 
     QString nodesPath() const;
     void setNodesPath(const QString &nodesPath);
@@ -33,11 +40,16 @@ public:
     void setTextPath(const QString &textPath);
 
     QString globalSettingsPath() const;
-    void setGlobalSettingsPath(const QString &globalSettingsPath);
+    void setGlobalSettingsPath(const QString &globalSettingsPath);    
+
 
     ~SVGRecoder();
 
+    QStringList info() const;
+    void setInfo(const QString &info);
+
 signals:
+    void infoChanged();
 
 private:
     explicit SVGRecoder(QObject *parent = nullptr);
@@ -54,6 +66,7 @@ private:
     QTextStream m_stream;
     QString m_globalWidth;
     QString m_globalHeight;
+    QStringList m_info;
 };
 
 #endif // SVGRECODER_H

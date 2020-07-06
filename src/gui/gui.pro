@@ -9,3 +9,6 @@ PLUGINS_DIR = $${ROOT_DIR}/plugins
 #--------------------------------------------------------------------------------------#
 
 TEMPLATE = subdirs
+
+SUBDIRS += \
+    qmlplugins
