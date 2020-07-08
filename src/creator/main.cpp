@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-
+#include "appsettings.h"
+#include "iohandler.h"
 #include "svgreader.h"
 #include "svgrecoder.h"
 
@@ -9,22 +10,16 @@ const QString globalSettingPath = "/home/adi/MyProj/Графы/JSONglobal";
 const QString nodesFilePath = "/home/adi/MyProj/Графы/JSONnodes";
 const QString edgesFilePath = "/home/adi/MyProj/Графы/JSONedges";
 const QString arrowsFilePath = "/home/adi/MyProj/Графы/JSONarrows";
-const QString textFilePath = "/home/adi/MyProj/Графы/JSONtext";
+const QString textFilePath = "/home/adi/MyProj/Графы/JSONtext1";
+const QString folder = "/home/adi/MyProj/Графы";
 
 int main(int argc, char *argv[])
 {    
     QCoreApplication::setApplicationName("SVG Parser");
     QCoreApplication::setOrganizationName("no_name");
-    QCoreApplication::setOrganizationDomain("no_name.com");
-
-    QString settingsFile = QCoreApplication::applicationDirPath() + QLatin1String("/") + "settings.ini";
-
-
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
     QGuiApplication app(argc, argv);
-
     QQmlApplicationEngine engine;
 
 #ifdef QT_NO_DEBUG
@@ -34,6 +29,9 @@ int main(int argc, char *argv[])
     engine.addImportPath(QCoreApplication::applicationDirPath() + QStringLiteral("/../plugins"));
 #endif
 
+    QString settingsFile = QCoreApplication::applicationDirPath() + QLatin1String("/") + "settings.ini";
+    AppSettings::init(settingsFile, QSettings::IniFormat);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -42,12 +40,8 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.load(url);
 
-    svgReader->setPath(inPath);
-    svgRecoder->setGlobalSettingsPath(globalSettingPath);
-    svgRecoder->setTextPath(textFilePath);
-    svgRecoder->setNodesPath(nodesFilePath);
-    svgRecoder->setEdgesPath(edgesFilePath);
-    svgRecoder->setArrowsPath(arrowsFilePath);
+    svgReader->setPath(appSettings->value("Parser/graphPath", inPath).toString());
+    svgRecoder->setLocation(appSettings->value("Parser/folder", folder).toString());
 //    svgRecoder->parse();
 //    svgRecoder->record();
     return app.exec();

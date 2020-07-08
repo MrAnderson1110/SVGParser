@@ -26,4 +26,5 @@ PLUGINS_DIR = $${ROOT_DIR}/plugins      # путь к собранным пла�
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    parser
+    parser \
+    utility_plugin

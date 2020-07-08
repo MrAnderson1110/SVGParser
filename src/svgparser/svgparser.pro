@@ -21,6 +21,9 @@ include(svgparser.pri)
 DEFINES += $${upper($$TARGET)}_LIB
 INCLUDEPATH += $${SRC_DIR}/svgparser
 
+LIBS += -L$${LIBS_DIR}/ -lutility
+INCLUDEPATH += $${SRC_DIR}/utility
+
 CONFIG(release, debug|release) {
     for(var, $$list($$files(qmldir, true))) {
         LSOURCE_FILE = $$join(var,,$$QMAKE_DIR_SEP,)

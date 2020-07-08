@@ -2,14 +2,26 @@ import QtQuick 2.14
 import QtQuick.Window 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
+import Qt.labs.platform 1.1 as Labs
 import parser 1.0
+import utility_plugin 1.0
 
 ApplicationWindow {
     id: root
     visible: true
-    width: 640
-    height: 480
+    width: AppSettings.value("MainWindow/width", 640)
+    height: AppSettings.value("MainWindow/height", 480)
+    x: AppSettings.value("MainWindow/x", 640)
+    y: AppSettings.value("MainWindow/y", 640)
     title: qsTr("SVG Creator")
+
+    Component.onDestruction: {
+        AppSettings.setValue("MainWindow/width", root.width)
+        AppSettings.setValue("MainWindow/height", root.height)
+        AppSettings.setValue("MainWindow/x", root.x)
+        AppSettings.setValue("MainWindow/y", root.y)
+        Recoder.saveSettings()
+    }
 
     property bool parserMode: false
 
@@ -18,8 +30,21 @@ ApplicationWindow {
         opacity: 0.2
         Menu {
             title: qsTr("Файл")
-            Action { id: newDoc; text: qsTr("Создать") }
-            Action { id: save; text: qsTr("Сохранить") }
+            Action {
+                id: chooseGenFolder;
+                text: qsTr("Генерировать код для GraphViz");
+                onTriggered: {
+                    folderDialog.open()
+                }
+            }
+            Action {
+                id: chooseParseFolder;
+                text: qsTr("Парсить SVG файл");
+                onTriggered: {
+                    folderDialog.open()
+                    folderDialog.currentFolder = AppSettings.value("Parser/location" ,Labs.StandardPaths.writableLocation(Labs.StandardPaths.HomeLocation))
+                }
+            }
             MenuSeparator {}
             Action { id: quit; text: qsTr("Выход"); onTriggered: root.close() }
         }
@@ -128,4 +153,9 @@ ApplicationWindow {
         duration: 500
     }
 
+    Labs.FolderDialog {
+        id: folderDialog
+        onFolderChanged: Recoder.location = folder
+        onCurrentFolderChanged: console.log("current folder", currentFolder)
+    }
 }

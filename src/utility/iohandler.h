@@ -11,7 +11,7 @@
 //class QQmlEngine;
 //class QJSEngine;
 
-class UTILITY_EXPORT IOHandler : QObject
+class UTILITY_EXPORT IOHandler : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(IOHandler)
@@ -21,22 +21,28 @@ public:
     static IOHandler *instance();
 //    static QObject *singletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
-    bool addNewFileByPath(const QString &name, const QString &path);
-
-    bool openFileToRead(const QString &name);
-    bool openFileToWrite(const QString &name);
+    QFile *openFileToRead(const QString &name);
+    QFile *openFileToWrite(const QString &name);
     void closeFile(const QString &name);
 
     QFile *currentFile() const;
-    void setCurrentFile(const QString &name);
+    void setCurrentFile(const QString &name, QIODevice::OpenModeFlag mode);
+
+    bool isOpen() const;
+
+    QString errorString() const;
 
     ~IOHandler();
 
 signals:
     void currentFileChanged();
 
+public slots:
+
+    void addNewFileByPath(QString path);
+
 private:
-    IOHandler(QObject *parent = nullptr) : QObject(parent) {}
+    IOHandler(QObject *parent = nullptr);
 
     QHash<QString, QFile *> m_existensFiles;
     QString m_currentFile;

@@ -1,7 +1,8 @@
 ﻿#ifndef SVGRECODER_H
 #define SVGRECODER_H
 
-#include <QObject>
+#include <QTextStream>
+#include <QUrl>
 #include "svgparser_global.h"
 #include "svgreader.h"
 #include "svgtype.h"
@@ -16,12 +17,12 @@ class SVGPARSER_EXPORT SVGRecoder : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(SVGRecoder)
     Q_PROPERTY(QStringList info READ info NOTIFY infoChanged)
+    Q_PROPERTY(QUrl location READ location WRITE setLocation NOTIFY locationChanged)
 
 public:
 
     static SVGRecoder *instance();
     static QObject *singletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
-
     void readAll();
 
     Q_INVOKABLE void parse();
@@ -42,18 +43,24 @@ public:
     QString globalSettingsPath() const;
     void setGlobalSettingsPath(const QString &globalSettingsPath);    
 
-
-    ~SVGRecoder();
+    Q_INVOKABLE void saveSettings() const;
 
     QStringList info() const;
     void setInfo(const QString &info);
 
+    QUrl location() const;
+    void setLocation(const QUrl &location);
+
 signals:
     void infoChanged();
+    void locationChanged(QUrl location);
+    void pathChanged(QString path);
+
+public slots:
+    void setFilesPaths(QUrl location);
 
 private:
     explicit SVGRecoder(QObject *parent = nullptr);
-    bool setOutFile(QFile *file);
 
     static SVGRecoder *m_instance;
     QList<SVGGroup *> m_groups;
@@ -62,11 +69,11 @@ private:
     QString m_edgesPath;
     QString m_arrowsPath;
     QString m_textPath;
-    QFile *m_outFile;
     QTextStream m_stream;
     QString m_globalWidth;
     QString m_globalHeight;
     QStringList m_info;
+    QUrl m_location;
 };
 
 #endif // SVGRECODER_H

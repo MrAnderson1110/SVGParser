@@ -1,5 +1,7 @@
 #include "iohandler.h"
 
+IOHandler *IOHandler::m_instance = nullptr;
+
 IOHandler *IOHandler::instance()
 {
     if(!m_instance)
@@ -7,29 +9,35 @@ IOHandler *IOHandler::instance()
     return m_instance;
 }
 
-bool IOHandler::addNewFileByPath(const QString &name, const QString &path)
+void IOHandler::addNewFileByPath(QString path)
 {
-    if(m_existensFiles[name])
-        return false;
+    if(path.isEmpty() || path.isNull()) {
+        qFatal("IOHandler::addNewFileByPath(): can not add file by empty path");
+    }
     QFile *tempFile = new QFile(path);
-    m_existensFiles[name] = tempFile;
-    return true;
+    m_existensFiles[path] = tempFile;
 }
 
-bool IOHandler::openFileToRead(const QString &name)
+IOHandler::IOHandler(QObject *parent) : QObject(parent) { }
+
+QFile *IOHandler::openFileToRead(const QString &path)
 {
-    if(!m_existensFiles[name] || name == m_currentFile)
-        return false;
-    setCurrentFile(name);
-    return currentFile()->open(QIODevice::ReadOnly);
+    if(!m_existensFiles[path])
+        qFatal("SVGReader::readNextComment(): file must be added to ioHandler before using");
+    if(path == m_currentFile)
+        return currentFile();
+    setCurrentFile(path, QIODevice::ReadOnly);
+    return currentFile()->open(QIODevice::ReadOnly) ? currentFile() : nullptr;
 }
 
-bool IOHandler::openFileToWrite(const QString &name)
+QFile *IOHandler::openFileToWrite(const QString &path)
 {
-    if(!m_existensFiles[name] || name == m_currentFile)
-        return false;
-    m_currentFile = name;
-    return currentFile()->open(QIODevice::WriteOnly);
+    if(!m_existensFiles[path])
+        qFatal("SVGReader::readNextComment(): file must be added to ioHandler before using");
+    if(path == m_currentFile)
+        return currentFile();
+    setCurrentFile(path, QIODevice::WriteOnly);
+    return currentFile()->open(QIODevice::WriteOnly) ? currentFile() : nullptr;
 }
 
 QFile *IOHandler::currentFile() const
@@ -39,17 +47,31 @@ QFile *IOHandler::currentFile() const
     return m_existensFiles[m_currentFile];
 }
 
-void IOHandler::setCurrentFile(const QString &name)
+void IOHandler::setCurrentFile(const QString &path, QIODevice::OpenModeFlag mode)
 {
-    if(currentFile()->isOpen())
+    if(isOpen())
         currentFile()->close();
-    m_currentFile = name;
+    if(mode == QIODevice::WriteOnly && QFile::exists(path))
+        QFile::remove(path);
+    m_currentFile = path;
     emit currentFileChanged();
+}
+
+bool IOHandler::isOpen() const
+{
+    if(currentFile() && currentFile()->isOpen())
+        return true;
+    else return false;
+}
+
+QString IOHandler::errorString() const
+{
+    return currentFile()->errorString();
 }
 
 IOHandler::~IOHandler()
 {
-    if(currentFile()->isOpen())
+    if(isOpen())
         currentFile()->close();
     for(QFile * file : m_existensFiles) {
         delete file;
